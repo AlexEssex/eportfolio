@@ -73,14 +73,17 @@
 		var $sidebar = $('#sidebar'),
 			$sidebar_inner = $sidebar.children('.inner');
 
-		// Inactive by default on <= large.
+		// Keep the sidebar visible at all times so the navigation stays fixed on the left.
 			breakpoints.on('<=large', function() {
-				$sidebar.addClass('inactive');
+				$sidebar.removeClass('inactive');
 			});
 
 			breakpoints.on('>large', function() {
 				$sidebar.removeClass('inactive');
 			});
+
+		// Remove the ability to collapse sidebar on hover/click.
+			$sidebar.removeClass('inactive');
 
 		// Hack: Workaround for Chrome/Android scrollbar position bug.
 			if (browser.os == 'android'
@@ -88,21 +91,8 @@
 				$('<style>#sidebar .inner::-webkit-scrollbar { display: none; }</style>')
 					.appendTo($head);
 
-		// Toggle.
-			$('<a href="#sidebar" class="toggle">Toggle</a>')
-				.appendTo($sidebar)
-				.on('click', function(event) {
-
-					// Prevent default.
-						event.preventDefault();
-						event.stopPropagation();
-
-					// Toggle.
-						$sidebar.toggleClass('inactive');
-
-				});
-
-		// Events.
+		// Sidebar toggle is disabled so the left navigation stays open.
+			// Events.
 
 			// Link clicks.
 				$sidebar.on('click', 'a', function(event) {
@@ -151,15 +141,15 @@
 
 				});
 
-			// Hide panel on body click/tap.
+			// Leave the panel open at all times.
 				$body.on('click touchend', function(event) {
 
 					// >large? Bail.
 						if (breakpoints.active('>large'))
 							return;
 
-					// Deactivate.
-						$sidebar.addClass('inactive');
+					// Keep the sidebar visible.
+						$sidebar.removeClass('inactive');
 
 				});
 
@@ -238,25 +228,19 @@
 		var $menu = $('#menu'),
 			$menu_openers = $menu.children('ul').find('.opener');
 
-		// Openers.
+		// Allow the Launch into Computing section to expand and collapse while keeping the sidebar visible.
+			$menu_openers.on('click', function(event) {
+				event.preventDefault();
+				event.stopPropagation();
+				$(this).toggleClass('active');
+			});
+
 			$menu_openers.each(function() {
-
-				var $this = $(this);
-
-				$this.on('click', function(event) {
-
-					// Prevent default.
-						event.preventDefault();
-
-					// Toggle.
-						$menu_openers.not($this).removeClass('active');
-						$this.toggleClass('active');
-
-					// Trigger resize (sidebar lock).
-						$window.triggerHandler('resize.sidebar-lock');
-
-				});
-
+				if ($(this).hasClass('active')) {
+					$(this).siblings('ul').css('display', 'block');
+				} else {
+					$(this).siblings('ul').css('display', 'none');
+				}
 			});
 
 })(jQuery);
